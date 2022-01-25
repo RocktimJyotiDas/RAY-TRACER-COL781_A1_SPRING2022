@@ -118,6 +118,7 @@ int main(int argc, char *arg[]){
     Color white_light (1.0, 1.0, 1.0, 0);
 	Color pretty_green (0.5, 1.0, 0.5, 0.3);
     Color maroon (0.5, 0.25, 0.25, 0);
+    Color tile_floor (1, 1, 1, 2);
 	Color gray (0.5, 0.5, 0.5, 0);
 	Color black (0.0, 0.0, 0.0, 0);
 	
@@ -126,7 +127,7 @@ int main(int argc, char *arg[]){
 
     Sphere scene_sphere (O, 1, pretty_green);
 	Sphere scene_sphere2 (new_sphere_location, 0.5, maroon);
-
+    Plane scene_plane (Y, -1, tile_floor);
     for(int x = 0; x < width; x++){
         for(int y = 0; y < height; y++){
             thisone = y*width + x;
