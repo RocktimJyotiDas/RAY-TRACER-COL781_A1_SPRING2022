@@ -84,12 +84,59 @@ void savebmp(const char *filename, int w, int h, int dpi, RGBType *data){
         fwrite(color, 1,3,f);
     }
     fclose(f);
-
-
-
-
 }
+
+int winningObjectIndex(vector<double> object_intersections) {
+	// return the index of the winning intersection
+	int index_of_minimum_value;
+	
+	// prevent unnessary calculations
+	if (object_intersections.size() == 0) {
+		// if there are no intersections
+		return -1;
+	}
+	else if (object_intersections.size() == 1) {
+		if (object_intersections.at(0) > 0) {
+			// if that intersection is greater than zero then its our index of minimum value
+			return 0;
+		}
+		else {
+			// otherwise the only intersection value is negative
+			return -1;
+		}
+	}
+	else {
+		// otherwise there is more than one intersection
+		// first find the maximum value
+		
+		double max = 0;
+		for (int i = 0; i < object_intersections.size(); i++) {
+			if (max < object_intersections.at(i)) {
+				max = object_intersections.at(i);
+			}
+		}
+		
+		// then starting from the maximum value find the minimum positive value
+		if (max > 0) {
+			// we only want positive intersections
+			for (int index = 0; index < object_intersections.size(); index++) {
+				if (object_intersections.at(index) > 0 && object_intersections.at(index) <= max) {
+					max = object_intersections.at(index);
+					index_of_minimum_value = index;
+				}
+			}
+			
+			return index_of_minimum_value;
+		}
+		else {
+			// all the intersections were negative
+			return -1;
+		}
+	}
+}
+
 int thisone;
+
 
 int main(int argc, char *arg[]){
     cout << "rendering ..."<<endl;
@@ -97,6 +144,7 @@ int main(int argc, char *arg[]){
     int dpi  = 72;
     int width = 640;
     int height = 480;
+    double aspectratio = (double)width/(double)height;
     int n = width*height;
     RGBType *pixels = new RGBType[n];
 
@@ -126,11 +174,45 @@ int main(int argc, char *arg[]){
 	Light scene_light (light_position, white_light);
 
     Sphere scene_sphere (O, 1, pretty_green);
-	Sphere scene_sphere2 (new_sphere_location, 0.5, maroon);
+	//Sphere scene_sphere2 (new_sphere_location, 0.5, maroon);
     Plane scene_plane (Y, -1, tile_floor);
+    vector<Object*> scene_objects;
+	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere));
+	//scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere2));
+	scene_objects.push_back(dynamic_cast<Object*>(&scene_plane));
+
+    double xamnt, yamnt;
     for(int x = 0; x < width; x++){
         for(int y = 0; y < height; y++){
             thisone = y*width + x;
+            // start with no anti-aliasing
+            if(width > height){
+                // if image is wider than it is tall
+                xamnt = ((x+0.5)/width)*aspectratio - (((width-height)/(double)height)/2);
+                yamnt = ((height - y)+0.5)/height; 
+            }
+            else if(height > width){
+                // if image is taller than it is wide.
+                xamnt = (x+0.5)/width;
+                yamnt = (((height - y)+0.5)/height)/aspectratio - (((height - width)/(double)width)/2);
+            }
+            else{
+                xamnt = (x+0.5)/width;
+                yamnt = ((height - y)+0.5)/height;
+            }
+            Vect cam_ray_origin = scene_cam.getCameraPosition();
+            Vect cam_ray_direction = camdir.vectAdd(camright.vectMult(xamnt - 0.5).vectAdd(camdown.vectMult(yamnt - 0.5))).normalize();
+
+            Ray cam_ray(cam_ray_origin, cam_ray_direction);
+
+            vector<double> intersections;
+
+            for(int index = 0; index < scene_objects.size(); index++){
+                intersections.push_back(scene_objects.at(index)->findIntersection(cam_ray));
+            }
+
+            int index_of_winning_object = winningObjectIndex(intersections);
+
             pixels[thisone].r = 23;
             pixels[thisone].g = 222;
             pixels[thisone].b = 10;
