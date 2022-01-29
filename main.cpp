@@ -19,7 +19,7 @@
 #include "Object.h"
 #include "Sphere.h"
 #include "Plane.h"
-
+#include "Triangle.h"
 
 using namespace std;
 
@@ -270,8 +270,8 @@ int main (int argc, char *argv[]) {
 	t1 = clock();
 	
 	int dpi = 72;
-	int width = 640;
-	int height = 480;
+	int width = 2000;
+	int height = 700;
 	int n = width*height;
 	RGBType *pixels = new RGBType[n];
 	
@@ -304,6 +304,7 @@ int main (int argc, char *argv[]) {
 	Color tile_floor (1, 1, 1, 2);
 	Color gray (0.5, 0.5, 0.5, 0);
 	Color black (0.0, 0.0, 0.0, 0);
+	Color orange (0.94, 0.75, 0.31,0);
 	
 	Vect light_position (-7,10,-10);
 	Light scene_light (light_position, white_light);
@@ -317,10 +318,12 @@ int main (int argc, char *argv[]) {
 	Sphere scene_sphere (O, 1, pretty_green);
 	Sphere scene_sphere2 (new_sphere_location, 0.5, gray);
 	Plane scene_plane (Y, -1, maroon);
+	Triangle scene_triangle(Vect(3,0,0),Vect(3,0,3),Vect(6,0,0), orange);
 	vector<Object*> scene_objects;
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere));
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere2));
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_plane));
+	scene_objects.push_back(dynamic_cast<Object*>(&scene_triangle));
 	
 	int thisone, aa_index;
 	double xamnt, yamnt;
