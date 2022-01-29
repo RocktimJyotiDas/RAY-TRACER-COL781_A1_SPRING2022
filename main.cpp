@@ -286,7 +286,7 @@ int main (int argc, char *argv[]) {
 	Vect Y (0,1,0);
 	Vect Z (0,0,1);
 	
-	Vect new_sphere_location (1.75, -0.25, 0);
+	Vect new_sphere_location (1.75, -0.5, 0);
 	
 	Vect campos (3, 1.5, -4);
 	
@@ -307,13 +307,16 @@ int main (int argc, char *argv[]) {
 	
 	Vect light_position (-7,10,-10);
 	Light scene_light (light_position, white_light);
+	Vect light_position2 (7,10,10);
+	Light scene_light2 (light_position2, white_light);
 	vector<Source*> light_sources;
 	light_sources.push_back(dynamic_cast<Source*>(&scene_light));
+	light_sources.push_back(dynamic_cast<Source*>(&scene_light2));
 	
 	// scene objects
 	Sphere scene_sphere (O, 1, pretty_green);
-	Sphere scene_sphere2 (new_sphere_location, 0.5, maroon);
-	Plane scene_plane (Y, -1, tile_floor);
+	Sphere scene_sphere2 (new_sphere_location, 0.5, gray);
+	Plane scene_plane (Y, -1, maroon);
 	vector<Object*> scene_objects;
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere));
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere2));
