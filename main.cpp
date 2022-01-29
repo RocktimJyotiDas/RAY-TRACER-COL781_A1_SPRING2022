@@ -92,7 +92,42 @@ void savebmp (const char *filename, int w, int h, int dpi, RGBType *data) {
 	
 	fclose(f);
 }
+vector<Object*> scene_objects;
+void Triangle2Cube(Vect corner1, Vect corner2, Color color){
+	double c1x = corner1.getVectX();
+	double c1y= corner1.getVectY();
+	double c1z = corner1.getVectZ();
 
+	double c2x = corner2.getVectX();
+	double c2y= corner2.getVectY();
+	double c2z = corner2.getVectZ();
+
+	Vect A(c2x, c1y, c1z);
+	Vect B(c2x, c1y, c2z);
+	Vect C(c1x, c1y, c2z);
+	
+	Vect D(c2x, c2y, c1z);
+	Vect E(c1x, c2y, c1z);
+	Vect F(c1x, c2y, c2z);
+
+	scene_objects.push_back(new Triangle(D,A,corner1, color));
+	scene_objects.push_back(new Triangle(corner1,E,D, color));
+
+	scene_objects.push_back(new Triangle(corner2,B,A, color));
+	scene_objects.push_back(new Triangle(A,D,corner2, color));
+
+	scene_objects.push_back(new Triangle(F,C,B, color));
+	scene_objects.push_back(new Triangle(B,corner2,F, color));
+
+	scene_objects.push_back(new Triangle(E,corner1,C, color));
+	scene_objects.push_back(new Triangle(C,F,E, color));
+
+	scene_objects.push_back(new Triangle(D,E,F, color));
+	scene_objects.push_back(new Triangle(F,corner2,D, color));
+
+	scene_objects.push_back(new Triangle(corner1,A,B, color));
+	scene_objects.push_back(new Triangle(B,C,corner1, color));
+}
 int winningObjectIndex(vector<double> object_intersections) {
 	// return the index of the winning intersection
 	int index_of_minimum_value;
@@ -318,13 +353,13 @@ int main (int argc, char *argv[]) {
 	Sphere scene_sphere (O, 1, pretty_green);
 	Sphere scene_sphere2 (new_sphere_location, 0.5, gray);
 	Plane scene_plane (Y, -1, maroon);
-	Triangle scene_triangle(Vect(3,0,0),Vect(3,0,3),Vect(6,0,0), orange);
-	vector<Object*> scene_objects;
+	Triangle scene_triangle(Vect(-2,-1,0),Vect(-3,1,0),Vect(-2.5,-1,-1), orange);
+
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere));
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere2));
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_plane));
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_triangle));
-	
+	Triangle2Cube(Vect(-3,-1,1.5),Vect(-3.5,1,2.5), orange);
 	int thisone, aa_index;
 	double xamnt, yamnt;
 	double tempRed, tempGreen, tempBlue;
