@@ -20,6 +20,7 @@
 #include "Sphere.h"
 #include "Plane.h"
 #include "Triangle.h"
+#include "Quadric.h"
 
 using namespace std;
 
@@ -321,7 +322,7 @@ int main (int argc, char *argv[]) {
 	Vect Y (0,1,0);
 	Vect Z (0,0,1);
 	
-	Vect new_sphere_location (1.75, -0.5, 0);
+	Vect new_sphere_location (1.75, 0, 0);
 	
 	Vect campos (3, 1.5, -4);
 	
@@ -351,12 +352,13 @@ int main (int argc, char *argv[]) {
 	
 	// scene objects
 	Sphere scene_sphere (O, 1, pretty_green);
-	Sphere scene_sphere2 (new_sphere_location, 0.5, gray);
+	//Sphere scene_sphere2 (new_sphere_location, 0.5, gray);
+	Quadric scene_cylinder (new_sphere_location, 0.5, gray, -1,0.5);
 	Plane scene_plane (Y, -1, maroon);
 	Triangle scene_triangle(Vect(-2,-1,0),Vect(-3,1,0),Vect(-2.5,-1,-1), orange);
 
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere));
-	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere2));
+	scene_objects.push_back(dynamic_cast<Object*>(&scene_cylinder));
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_plane));
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_triangle));
 	Triangle2Cube(Vect(-3,-1,1.5),Vect(-3.5,1,2.5), orange);
