@@ -20,6 +20,8 @@
 #include "Sphere.h"
 #include "Plane.h"
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 using namespace std;
 
@@ -319,10 +321,12 @@ int main (int argc, char *argv[]) {
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere2));
 	scene_objects.push_back(dynamic_cast<Object*>(&scene_plane));
 	
+
 	int thisone, aa_index;
 	double xamnt, yamnt;
 	double tempRed, tempGreen, tempBlue;
-	
+	unsigned char image[n*3];
+
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			thisone = y*width + x;
@@ -437,13 +441,107 @@ int main (int argc, char *argv[]) {
 			pixels[thisone].r = avgRed;
 			pixels[thisone].g = avgGreen;
 			pixels[thisone].b = avgBlue;
+
+			image[thisone+0] = (int)floor(avgRed*255);
+			image[thisone+1] = (int)floor(avgGreen*255);
+			image[thisone+2] = (int)floor(avgBlue*255);
+
 		}
 	}
 	
+	int arrSize = sizeof(image)/sizeof(image[0]);
+	cout << arrSize << endl;
+
+	// [ 255 247  ....    ]
+	for (int i = 0; i < n; i++){
+
+		unsigned char red 		= (pixels[i].r)*255;
+		unsigned char green 	= (pixels[i].g)*255;
+		unsigned char blue 		= (pixels[i].b)*255;
+
+		cout << i*3 << endl;
+		image[i*3+0] = red;
+		image[i*3+1] = green;
+		image[i*3+2] = blue; 
+	}
+	cout << "filled" << endl;
 	savebmp("scene_anti-aliased.bmp",width,height,dpi,pixels);
 	
 	delete pixels, tempRed, tempGreen, tempBlue;
 	
+	// display using glfw window
+	GLFWwindow* window;
+
+    if (!glfwInit()) {
+        printf("Couldn't init GLFW\n");
+        return 1;
+    }
+
+	// unsigned char* data = new unsigned char[100*100*3];
+	// for (int y=0; y<100; y++){
+	// 	for (int x=0; x<100; x++){
+	// 		data[ y*100*3 + x*3 ]=0xff;
+	// 		data[ y*100*3 + x*3 + 1]=0x00;
+	// 		data[ y*100*3 + x*3 + 2]=0x00;
+	// 	}
+	// }
+
+    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    if (!window) {
+        printf("Couldn't open window\n");
+        return 1;
+    }
+	
+	glfwMakeContextCurrent(window);
+	// while (!glfwWindowShouldClose(window)) {
+
+	// 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// 	glDrawPixels(100,100,GL_RGB, GL_UNSIGNED_BYTE,data);
+	// 	glfwWaitEvents();
+	// }
+
+	// Generate texture
+    GLuint tex_handle;
+    glGenTextures(1, &tex_handle);
+    glBindTexture(GL_TEXTURE_2D, tex_handle);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+
+    while (!glfwWindowShouldClose(window)) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Set up orphographic projection
+        int window_width, window_height;
+        glfwGetFramebufferSize(window, &window_width, &window_height);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, window_width, window_height, 0, -1, 1);
+        glMatrixMode(GL_MODELVIEW);
+
+        // Render texture
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D,tex_handle);
+
+        glBegin(GL_QUADS);
+            glTexCoord2d(0,0); glVertex2i(0, 0);
+            glTexCoord2d(1,0); glVertex2i(640, 0);
+            glTexCoord2d(1,1); glVertex2i(640, 480);
+            glTexCoord2d(0,1); glVertex2i(0, 480);
+        glEnd();
+		
+        glDisable(GL_TEXTURE_2D);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+
+	}
 	t2 = clock();
 	float diff = ((float)t2 - (float)t1)/1000;
 	

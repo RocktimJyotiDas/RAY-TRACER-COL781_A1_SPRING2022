@@ -6,6 +6,10 @@
 #include "Vect.h"
 #include "Color.h"
 
+#include<iostream>
+
+using namespace std;
+
 class Plane : public Object {
 	Vect normal;
 	double distance;
@@ -37,6 +41,7 @@ class Plane : public Object {
 		}
 		else {
 			double b = normal.dotProduct(ray.getRayOrigin().vectAdd(normal.vectMult(distance).negative()));
+			// cout<<b<<endl;
 			return -1*b/a;
 		}
 	}
