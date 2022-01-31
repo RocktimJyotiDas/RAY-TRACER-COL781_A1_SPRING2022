@@ -459,7 +459,7 @@ int main (int argc, char *argv[]) {
 		unsigned char green 	= (pixels[i].g)*255;
 		unsigned char blue 		= (pixels[i].b)*255;
 
-		cout << i*3 << endl;
+		// cout << i*3 << endl;
 		image[i*3+0] = red;
 		image[i*3+1] = green;
 		image[i*3+2] = blue; 
@@ -530,10 +530,10 @@ int main (int argc, char *argv[]) {
 		glBindTexture(GL_TEXTURE_2D,tex_handle);
 
         glBegin(GL_QUADS);
-            glTexCoord2d(0,0); glVertex2i(0, 0);
-            glTexCoord2d(1,0); glVertex2i(640, 0);
-            glTexCoord2d(1,1); glVertex2i(640, 480);
-            glTexCoord2d(0,1); glVertex2i(0, 480);
+            glTexCoord2d(0,0); glVertex2i(640, 480);
+            glTexCoord2d(1,0); glVertex2i(0, 480);
+            glTexCoord2d(1,1); glVertex2i(0, 0);
+            glTexCoord2d(0,1); glVertex2i(640, 0);
         glEnd();
 		
         glDisable(GL_TEXTURE_2D);
