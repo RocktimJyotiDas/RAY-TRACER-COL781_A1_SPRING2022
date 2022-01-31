@@ -1,14 +1,18 @@
 #ifndef _SOURCE_H
 #define _SOURCE_H
 
-#include "Vect.h"
+#include <armadillo>
+
+using namespace arma;
+
 #include "Color.h"
+
 class Source {
 	public:
 	
 	Source();
 	
-	virtual Vect getLightPosition() {return Vect(0, 0, 0);}
+	virtual mat getLightPosition() {return mat{0, 0, 0};}
 	virtual Color getLightColor() {return Color(1, 1, 1, 0);}
 	
 };

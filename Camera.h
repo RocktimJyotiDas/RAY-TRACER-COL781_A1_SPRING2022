@@ -1,33 +1,35 @@
 #ifndef _Camera_H
 #define _Camera_H
 
-#include "Vect.h"
+#include <armadillo>
+
+using namespace arma;
 
 class Camera {
-	Vect campos, camdir, camright, camdown;
+	mat campos, camdir, camright, camdown;
 	
 	public:
 	
 	Camera ();
 	
-	Camera (Vect, Vect, Vect, Vect);
+	Camera (mat, mat, mat, mat);
 	
 	// method functions
-	Vect getCameraPosition () { return campos; }
-	Vect getCameraDirection () { return camdir; }
-	Vect getCameraRight () { return camright; }
-	Vect getCameraDown () { return camdown; }
+	mat getCameraPosition () { return campos; }
+	mat getCameraDirection () { return camdir; }
+	mat getCameraRight () { return camright; }
+	mat getCameraDown () { return camdown; }
 	
 };
 
 Camera::Camera () {
-	campos = Vect(0,0,0);
-	camdir = Vect(0,0,1);
-	camright = Vect(0,0,0);
-	camdown = Vect(0,0,0);
+	campos = mat{0,0,0};
+	camdir = mat{0,0,1};
+	camright = mat{0,0,0};
+	camdown = mat{0,0,0};
 }
 
-Camera::Camera (Vect pos, Vect dir, Vect right, Vect down) {
+Camera::Camera (mat pos, mat dir, mat right, mat down) {
 	campos = pos;
 	camdir = dir;
 	camright = right;

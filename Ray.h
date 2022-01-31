@@ -1,25 +1,28 @@
 #ifndef _RAY_H
 #define _RAY_H
 
-#include "Vect.h"
 #include "math.h"
+#include <armadillo>
+
+using namespace arma;
+
 class Ray{
-    Vect origin, direction;
+    mat origin, direction;
     double x,y,z;
 
     public:
     Ray();
-    Ray(Vect, Vect);
-    Vect getRayOrigin(){return origin;}
-    Vect getRayDirection(){return direction;}
+    Ray(mat, mat);
+    mat getRayOrigin(){return origin;}
+    mat getRayDirection(){return direction;}
     
 };
 Ray::Ray(){
-    origin = Vect(0,0,0);
-    direction = Vect(1,0,0);
+    origin = mat{0,0,0};
+    direction = mat{1,0,0};
 }
 
-Ray::Ray(Vect o, Vect d){
+Ray::Ray(mat o, mat d){
     origin = o;
     direction = d;
 }

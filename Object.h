@@ -2,8 +2,16 @@
 #define _OBJECT_H
 
 #include "Ray.h"
-#include "Vect.h"
 #include "Color.h"
+
+#include <armadillo>
+
+using namespace arma;
+
+// Normalise vector with second norm
+mat normalize(mat M){
+    return M/norm(M,2);
+}
 
 class Object {	
 	public:
@@ -13,8 +21,8 @@ class Object {
 	// method functions
 	virtual Color getColor () { return Color (0.0, 0.0, 0.0, 0); }
 	
-	virtual Vect getNormalAt(Vect intersection_position) {
-		return Vect (0, 0, 0);
+	virtual mat getNormalAt(mat intersection_position) {
+		return mat{0, 0, 0};
 	}
 	
 	virtual double findIntersection(Ray ray) {

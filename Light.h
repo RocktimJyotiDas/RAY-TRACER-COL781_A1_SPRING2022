@@ -2,31 +2,33 @@
 #define _Light_H
 
 #include "Source.h"
-#include "Vect.h"
 #include "Color.h"
 
+#include <armadillo>
+using namespace arma;
+
 class Light : public Source {
-	Vect position;
+	mat position;
 	Color color;
 	
 	public:
 	
 	Light ();
 	
-	Light (Vect, Color);
+	Light (mat, Color);
 	
 	// method functions
-	virtual Vect getLightPosition () { return position; }
+	virtual mat getLightPosition () { return position; }
 	virtual Color getLightColor () { return color; }
 	
 };
 
 Light::Light () {
-	position = Vect(0,0,0);
+	position = mat{0,0,0};
 	color = Color(1,1,1, 0);
 }
 
-Light::Light (Vect p, Color c) {
+Light::Light (mat p, Color c) {
 	position = p;
 	color = c;
 }

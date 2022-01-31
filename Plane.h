@@ -3,11 +3,16 @@
 
 #include "math.h"
 #include "Object.h"
-#include "Vect.h"
 #include "Color.h"
 
+#include <iostream>
+#include <armadillo>
+
+using namespace std;
+using namespace arma;
+
 class Plane : public Object {
-	Vect normal;
+	mat normal;
 	double distance;
 	Color color;
 	
@@ -15,28 +20,30 @@ class Plane : public Object {
 	
 	Plane ();
 	
-	Plane (Vect, double, Color);
+	Plane (mat, double, Color);
 	
 	// method functions
-	Vect getPlaneNormal () { return normal; }
+	mat getPlaneNormal () { return normal; }
 	double getPlaneDistance () { return distance; }
 	virtual Color getColor () { return color; }
 	
-	virtual Vect getNormalAt(Vect point) {
+	virtual mat getNormalAt(mat point) {
 		return normal;
 	}
 	
 	virtual double findIntersection(Ray ray) {
-		Vect ray_direction = ray.getRayDirection();
+		mat ray_direction = ray.getRayDirection();
 		
-		double a = ray_direction.dotProduct(normal);
+		double a = dot(normal, ray_direction);
 		
 		if (a == 0) {
 			// ray is parallel to the plane
 			return -1;
 		}
 		else {
-			double b = normal.dotProduct(ray.getRayOrigin().vectAdd(normal.vectMult(distance).negative()));
+			
+			double b = dot(normal,ray.getRayOrigin()+(-normal*distance));
+			// cout<<b<<endl;
 			return -1*b/a;
 		}
 	}
@@ -44,12 +51,12 @@ class Plane : public Object {
 };
 
 Plane::Plane () {
-	normal = Vect(1,0,0);
+	normal = mat{1,0,0};
 	distance = 0;
 	color = Color(0.5,0.5,0.5, 0);
 }
 
-Plane::Plane (Vect normalValue, double distanceValue, Color colorValue) {
+Plane::Plane (mat normalValue, double distanceValue, Color colorValue) {
 	normal = normalValue;
 	distance = distanceValue;
 	color = colorValue;
