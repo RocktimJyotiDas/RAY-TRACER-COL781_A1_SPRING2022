@@ -211,7 +211,7 @@ Color getColorAt(mat intersection_position, mat intersecting_ray_direction, vect
 		}
 	}
 	
-	Color final_color = winning_object_color.colorScalar(ambientlight);
+	Color final_color = winning_object_color.colorScalar(ambientlight); // Ka * I
 	
 	if (winning_object_color.getColorSpecial() > 0 && winning_object_color.getColorSpecial() <= 1) {
 		// reflection from objects with specular intensity
@@ -324,7 +324,7 @@ int main (int argc, char *argv[]) {
 	int n = width*height;
 	RGBType *pixels = new RGBType[n];
 	
-	int aadepth = 1;
+	int aadepth = 3;
 	double aathreshold = 0.1;
 	double aspectratio = (double)width/(double)height;
 	double ambientlight = 0.2;
