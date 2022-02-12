@@ -11,8 +11,11 @@
 #include <time.h>
 
 #include <iostream>
+
+// Matrix Operations
 #include <armadillo>
 
+// Open GL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -26,6 +29,7 @@
 #include "Plane.h"
 #include "Triangle.h"
 #include "Quadric.h"
+#include "Parse.h"
 
 using namespace std;
 using namespace arma;
@@ -138,7 +142,7 @@ void Triangle2Cube(mat corner1, mat corner2, Color color){
 	scene_objects.push_back(new Triangle(B,C,corner1, color));
 }
 
-int winningObjectIndex(vector<double> object_intersections) {
+int FirstIntersection(vector<double> object_intersections) {
 	// return the index of the winning intersection
 	int index_of_minimum_value;
 	
@@ -187,7 +191,7 @@ int winningObjectIndex(vector<double> object_intersections) {
 	}
 }
 
-Color getColorAt(mat intersection_position, mat intersecting_ray_direction, vector<Object*> scene_objects, int index_of_winning_object, vector<Source*> light_sources, double accuracy, double ambientlight) {
+Color getColorAtPoint(mat intersection_position, mat intersecting_ray_direction, vector<Object*> scene_objects, int index_of_winning_object, vector<Source*> light_sources, double accuracy, double ambientlight) {
 	
 	Color winning_object_color = scene_objects.at(index_of_winning_object)->getColor();
 	mat winning_object_normal = scene_objects.at(index_of_winning_object)->getNormalAt(intersection_position);
@@ -231,7 +235,7 @@ Color getColorAt(mat intersection_position, mat intersecting_ray_direction, vect
 			reflection_intersections.push_back(scene_objects.at(reflection_index)->findIntersection(reflection_ray));
 		}
 		
-		int index_of_winning_object_with_reflection = winningObjectIndex(reflection_intersections);
+		int index_of_winning_object_with_reflection = FirstIntersection(reflection_intersections);
 		
 		if (index_of_winning_object_with_reflection != -1) {
 			// reflection ray missed everthing else
@@ -243,7 +247,7 @@ Color getColorAt(mat intersection_position, mat intersecting_ray_direction, vect
 
 				mat reflection_intersection_ray_direction = reflection_direction;
 				
-				Color reflection_intersection_color = getColorAt(reflection_intersection_position, reflection_intersection_ray_direction, scene_objects, index_of_winning_object_with_reflection, light_sources, accuracy, ambientlight);
+				Color reflection_intersection_color = getColorAtPoint(reflection_intersection_position, reflection_intersection_ray_direction, scene_objects, index_of_winning_object_with_reflection, light_sources, accuracy, ambientlight);
 				
 				final_color = final_color.colorAdd(reflection_intersection_color.colorScalar(winning_object_color.getColorSpecial()));
 			}
@@ -313,23 +317,49 @@ Color getColorAt(mat intersection_position, mat intersecting_ray_direction, vect
 int thisone;
 
 int main (int argc, char *argv[]) {
-	cout << "rendering ..." << endl;
-	
+
+	map<string,vector<double>> args;
+	map<string,map<string,vector<double>>> objects;
+	if(argc==1)
+	{
+        string inpFile = "metadata.json";
+		printf("\n Using default metadata.json");
+		pair< map<string,vector<double>>, map<string,map<string,vector<double>>> > meta = parse_args(inpFile);
+		args 	= meta.first;
+		objects = meta.second;
+
+	}
+
+	if(argc>=2)
+    {
+		string inpFile(argv[1]);
+        printf("\nNumber Of Arguments Passed: %d",argc);
+        printf("\nUsing input file : %s", inpFile.c_str());
+		cout<<endl;
+		pair< map<string,vector<double>>, map<string,map<string,vector<double>>> > meta = parse_args(inpFile);
+		args 	= meta.first;
+		objects = meta.second;
+    }
+
+	cout << "rendering ..." << endl;	
+
 	clock_t t1, t2;
 	t1 = clock();
 	
-	int dpi = 72;
-	int width = 640;
-	int height = 480;
+    int dpi = 72;
+	int width  = (int)args["scene_properties"][0];
+	int height = (int)args["scene_properties"][1];
+
 	int n = width*height;
 	RGBType *pixels = new RGBType[n];
 	
-	int aadepth = 3;
-	double aathreshold = 0.1;
-	double aspectratio = (double)width/(double)height;
-	double ambientlight = 0.2;
-	double accuracy = 0.00000001;
+	int aadepth         = (int)args["scene_properties"][2];  // anti-aliasing depth
+	double aathreshold  = (double)args["scene_properties"][3];  // anti-aliasing threshold
+	double aspectratio  = (double)width/(double)height; // aspect ratio
+	double ambientlight = (double)args["scene_properties"][4];  // ambient light
+	double accuracy     = (double)args["scene_properties"][5];  // accuracy of intersect
 	
+	// Coordinate system
 	mat O {0,0,0};
 	mat X {1,0,0};
 	mat Y {0,1,0};
@@ -337,46 +367,89 @@ int main (int argc, char *argv[]) {
 	
 	mat new_sphere_location {1.75, -0.25, 0};
 	
-	mat campos {3, 1.5, -4};
-	
-	mat look_at {0, 0, 0};
+	mat campos{args["Camera_Position"][0], args["Camera_Position"][1], args["Camera_Position"][2]};
+	mat look_at{args["Lookup_Position"][0], args["Lookup_Position"][1], args["Lookup_Position"][2]};
+
 	mat diff_btw = campos - look_at;
-	
+
 	mat camdir 	 = normalize(-diff_btw);
 	mat camright = normalize(cross(Y, camdir));
 	mat camdown  = cross(camright,camdir);
 
 	Camera scene_cam (campos, camdir, camright, camdown);
 	
+	Color black (0.0, 0.0, 0.0, 0);
 	Color white_light (1.0, 1.0, 1.0, 0);
+
+	/*
 	Color pretty_green (0.5, 1.0, 0.5, 0.3);
+	Color orange (0.94, 0.75, 0.31,0);
 	Color maroon (0.5, 0.25, 0.25, 0);
 	Color tile_floor (1, 1, 1, 2);
 	Color gray (0.5, 0.5, 0.5, 0);
-	Color black (0.0, 0.0, 0.0, 0);
-	Color orange (0.94, 0.75, 0.31,0);
+	*/
+
+
 	
-	mat light_position {-7,10,-10};
-	Light scene_light (light_position, white_light);
-	mat light_position2 {7,10,10};
-	Light scene_light2 (light_position2, white_light);
+
+	// R : reflectance of R, G : reflectance of G, B : reflactance of B, special : specular
 	vector<Source*> light_sources;
 
+	mat light_position {-7,10,-10};
+	Light scene_light (light_position, white_light);
 	light_sources.push_back(dynamic_cast<Source*>(&scene_light));
+
+
+	mat light_position2 {7,10,10};
+	Light scene_light2 (light_position2, white_light);
 	light_sources.push_back(dynamic_cast<Source*>(&scene_light2));
 
 	// scene objects
-	Sphere scene_sphere (O, 1, pretty_green);
-	//Sphere scene_sphere2 (new_sphere_location, 0.5, gray);
-	Quadric scene_cylinder (new_sphere_location, 0.5, gray, -1,0.5);
-	Plane scene_plane (Y, -1, maroon);
-	Triangle scene_triangle(mat{-2,-1,0},mat{-3,1,0},mat{-2.5,-1,-1}, orange);
+	Sphere scene_sphere (
+		mat{objects["Sphere"]["Location"][0],objects["Sphere"]["Location"][1],objects["Sphere"]["Location"][2]},
+		objects["Sphere"]["Radius"][0],
+		Color(objects["Sphere"]["Color"][0], objects["Sphere"]["Color"][1], objects["Sphere"]["Color"][2],objects["Sphere"]["Color"][3]));
 
-	scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere));
-	scene_objects.push_back(dynamic_cast<Object*>(&scene_cylinder));
-	scene_objects.push_back(dynamic_cast<Object*>(&scene_plane));
-	scene_objects.push_back(dynamic_cast<Object*>(&scene_triangle));
-	Triangle2Cube(mat{-3,-1,1.5},mat{-3.5,1,2.5}, orange);
+	Quadric scene_cylinder (
+		mat{objects["Quadric"]["Location"][0],objects["Quadric"]["Location"][1],objects["Quadric"]["Location"][2]}
+		, objects["Quadric"]["Radius"][0],
+		Color(objects["Quadric"]["Color"][0], objects["Quadric"]["Color"][1], objects["Quadric"]["Color"][2],objects["Quadric"]["Color"][3]),
+		objects["Quadric"]["Height"][0],
+		objects["Quadric"]["Height"][1]);
+
+	Plane scene_plane (
+		mat{objects["Plane"]["Normal"][0],objects["Plane"]["Normal"][1],objects["Plane"]["Normal"][2]},
+		objects["Plane"]["Distance"][0],
+		Color(objects["Plane"]["Color"][0], objects["Plane"]["Color"][1], objects["Plane"]["Color"][2],objects["Plane"]["Color"][3]));
+
+
+
+	Triangle scene_triangle(
+		mat{objects["Triangle"]["Location"][0],objects["Triangle"]["Location"][1],objects["Triangle"]["Location"][2]},
+		mat{objects["Triangle"]["Location"][3],objects["Triangle"]["Location"][4],objects["Triangle"]["Location"][5]},
+		mat{objects["Triangle"]["Location"][6],objects["Triangle"]["Location"][7],objects["Triangle"]["Location"][8]},
+
+		Color(objects["Triangle"]["Color"][0], objects["Triangle"]["Color"][1], objects["Triangle"]["Color"][2],objects["Triangle"]["Color"][3]));
+
+	if (objects["Sphere"]["Show"][0])
+		scene_objects.push_back(dynamic_cast<Object*>(&scene_sphere));
+	
+	if (objects["Quadric"]["Show"][0])
+		scene_objects.push_back(dynamic_cast<Object*>(&scene_cylinder));
+	
+	if (objects["Plane"]["Show"][0])
+		scene_objects.push_back(dynamic_cast<Object*>(&scene_plane));
+	
+	if (objects["Triangle"]["Show"][0])
+		scene_objects.push_back(dynamic_cast<Object*>(&scene_triangle));
+	
+	if (objects["Cuboid"]["Show"][0]) {
+		Triangle2Cube(
+		mat{objects["Cuboid"]["Location"][0],objects["Cuboid"]["Location"][1],objects["Cuboid"]["Location"][2]},
+		mat{objects["Cuboid"]["Location"][3],objects["Cuboid"]["Location"][4],objects["Cuboid"]["Location"][5]},
+
+		Color(objects["Cuboid"]["Color"][0], objects["Cuboid"]["Color"][1], objects["Cuboid"]["Color"][2],objects["Cuboid"]["Color"][3]));
+	}
 
 	unsigned char image[n*3];
 	int thisone, aa_index;
@@ -449,7 +522,7 @@ int main (int argc, char *argv[]) {
 						intersections.push_back(scene_objects.at(index)->findIntersection(cam_ray));
 					}
 					
-					int index_of_winning_object = winningObjectIndex(intersections);
+					int index_of_winning_object = FirstIntersection(intersections);
 					
 					if (index_of_winning_object == -1) {
 						// set the backgroung black
@@ -466,7 +539,7 @@ int main (int argc, char *argv[]) {
 
 							mat intersecting_ray_direction = cam_ray_direction;
 		
-							Color intersection_color = getColorAt(intersection_position, intersecting_ray_direction, scene_objects, index_of_winning_object, light_sources, accuracy, ambientlight);
+							Color intersection_color = getColorAtPoint(intersection_position, intersecting_ray_direction, scene_objects, index_of_winning_object, light_sources, accuracy, ambientlight);
 							
 							tempRed[aa_index] = intersection_color.getColorRed();
 							tempGreen[aa_index] = intersection_color.getColorGreen();

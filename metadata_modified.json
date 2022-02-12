@@ -1,0 +1,55 @@
+{
+    "type":"POVRAY FORMAT",
+    "Camera_Position":[3, 1.5, -4],
+    "Lookup_Position":[0.0, 0.0, 0.0],
+    
+    "Height":640,
+    "Width":480,
+    "anti_aliasing":1,
+    "threshold":0.1,
+    "ambientlight":0.2,
+    "accuracy":0.00000001,
+    "Light_Source":[2],
+    
+    "objects": {
+        "Sphere":{
+            "Location":[0,0,0],
+            "Radius"  :[1], 
+            "Color"   :[0.5, 0.25, 0.25, 0.4],
+            "Show"    :[1]
+        },
+
+        "Triangle":{
+            "Location":[-2,-1,0,-3,1,0,-2.5,-1,-1],
+            "Color"   :[0.94, 0.75, 0.31,0.4],
+            "Show"    :[0]
+
+        },
+
+        "Quadric":{
+            "Location" :[1.75, -0.25, 0],
+            "Radius"   :[0.5],
+            "Height"   :[-1, 0.5], 
+            "Color"    :[0.9, 0.5, 0.8, 0.1],
+            "Show"     :[0]
+
+        },
+
+        "Plane":{
+            "Normal"  :[0,1,0],
+            "Distance":[-1],
+            "Color"   :[0.5,0.5,0.5,0],
+            "Show"    :[1]
+
+        },
+        "Cuboid":{
+            "Location":[1,1,1,-1,-1,-1],
+            "Color"   :[0.94, 0.75, 0.31,0],
+            "Show"    :[0]
+
+        }
+
+    }
+}
+
+
